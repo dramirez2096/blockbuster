@@ -21,6 +21,7 @@ playGame.prototype = {
     preload: function(){
         game.load.image("ball", "img/ball-sprite.png");
         game.load.image("panel", "img/panel.png");
+        game.load.image("path", "img/trajectory.png");
     },
 
     // creates game elements
@@ -64,7 +65,10 @@ playGame.prototype = {
         this.ball.body.collideWorldBounds = true;
         this.ball.body.bounce.set(1);
 
-
+        // creates ball shooting path 
+        this.path = game.add.sprite(this.ball.x, this.ball.y, "path");
+        this.path.anchor.set(0.5, 1);
+        this.path.visible = false;
     },
 
     aimBall: function(e){
