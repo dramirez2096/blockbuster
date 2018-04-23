@@ -101,7 +101,6 @@ playGame.prototype = {
                 this.path.visible = true;
                 this.direction = Phaser.Math.angleBetween(e.position.x, e.position.y, e.positionDown.x, e.positionDown.y);
                 this.path.angle = Phaser.Math.radToDeg(this.direction) + 90;
-                console.log('works');
             }
             else{
                 this.path.visible = false;
@@ -112,7 +111,8 @@ playGame.prototype = {
     shootBall: function (){
         if(this.path.visible){
             var shootingAngle = Phaser.Math.degToRad(this.path.angle - 90);
-            this.ball.velocity.set(globalOptions.ballSpeed * Math.cos(shootingAngle), globalOptions.ballSpeed * Math.sin(shootingAngle));
+            this.ball.body.velocity.set(globalOptions.ballSpeed * Math.cos(shootingAngle), globalOptions.ballSpeed * Math.sin(shootingAngle));
+            console.log(this.ball.velocity);
             this.shooting = true;
         }
         this.aiming = false;
