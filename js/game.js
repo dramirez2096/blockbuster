@@ -64,5 +64,16 @@ playGame.prototype = {
         this.ball.body.collideWorldBounds = true;
         this.ball.body.bounce.set(1);
 
+
+    },
+
+    aimBall: function(e){
+        if(!this.shooting){
+            this.aiming = true;
+        }
+    },
+
+    shootBall: function (){
+
     }
 }
