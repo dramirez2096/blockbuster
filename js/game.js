@@ -46,6 +46,9 @@ playGame.prototype = {
         this.bottomPanel.height = Math.round(game.height * globalOptions.bottomPanelHeight);
         this.bottomPanel.anchor.set(0, 1);
 
+        // adds Phaser arcade physics engine on bottom panel
+        game.physics.enable(this.bottomPanel, Phaser.Physics.ARCADE);
+
         // creates ball 
         var ballSize = game.width * globalOptions.ballSize;
         this.ball = game.add.sprite(game.width / 2, game.height - this.bottomPanel.height - ballSize / 2, "ball");
@@ -53,5 +56,13 @@ playGame.prototype = {
         this.ball.height = ballSize;
         this.ball.anchor.set(0.5);
         console.log(this.ball);
+
+        // adds Phaser arcade physics engine to ball
+        game.physics.enable(this.ball, Phaser.Physics.ARCADE);
+
+        // makes ball collide on bounds
+        this.ball.body.collideWorldBounds = true;
+        this.ball.body.bounce.set(1);
+
     }
 }
