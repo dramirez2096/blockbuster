@@ -26,6 +26,9 @@ playGame.prototype = {
     // creates game elements
     create: function(){
 
+        // import Phaser Arcade physics engine
+        game.physics.startSystem(Phaser.Physics.ARCADE);
+
         // scales and sets background color
         game.scale.scaleMode = Phaser.ScaleManager.SHOW_ALL;
         game.scale.pageAlignHorizontally = true;
