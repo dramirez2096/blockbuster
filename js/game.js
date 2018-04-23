@@ -4,7 +4,8 @@ var game;
 var globalOptions = {
     ballSize: 0.04,
     scorePanelHeight: 0.08,
-    bottomPanelHeight: 0.18
+    bottomPanelHeight: 0.18,
+    ballSpeed: 1000
 }
 
 // starts up game when window loads
@@ -50,13 +51,14 @@ playGame.prototype = {
         // adds Phaser arcade physics engine on bottom panel
         game.physics.enable(this.bottomPanel, Phaser.Physics.ARCADE);
 
+        this.bottomPanel.body.immovable = true;
+
         // creates ball 
         var ballSize = game.width * globalOptions.ballSize;
         this.ball = game.add.sprite(game.width / 2, game.height - this.bottomPanel.height - ballSize / 2, "ball");
         this.ball.width = ballSize;
         this.ball.height = ballSize;
         this.ball.anchor.set(0.5);
-        console.log(this.ball);
 
         // adds Phaser arcade physics engine to ball
         game.physics.enable(this.ball, Phaser.Physics.ARCADE);
@@ -69,6 +71,17 @@ playGame.prototype = {
         this.path = game.add.sprite(this.ball.x, this.ball.y, "path");
         this.path.anchor.set(0.5, 1);
         this.path.visible = false;
+
+        // code for player inputs
+        game.input.onDown.add(this.aimBall, this);
+        game.input.onUp.add(this.shootBall, this);
+        game.input.addMoveCallback(this.adjustBall, this);
+
+        // player not aiming by default
+        this.aiming = false;
+
+        // player not shooting by default
+        this.shooting = false;
     },
 
     aimBall: function(e){
@@ -77,7 +90,41 @@ playGame.prototype = {
         }
     },
 
-    shootBall: function (){
+    adjustBall: function(e){
+        if(this.aiming){
+            var distX = e.position.x - e.positionDown.x;
+            var distY = e.position.y - e.positionDown.y;
+            console.log(distX,distY);
 
+            if (distY > 10){
+                this.path.position.set(this.ball.x, this.ball.y);
+                this.path.visible = true;
+                this.direction = Phaser.Math.angleBetween(e.position.x, e.position.y, e.positionDown.x, e.positionDown.y);
+                this.path.angle = Phaser.Math.radToDeg(this.direction) + 90;
+                console.log('works');
+            }
+            else{
+                this.path.visible = false;
+            }
+        }
+    },
+
+    shootBall: function (){
+        if(this.path.visible){
+            var shootingAngle = Phaser.Math.degToRad(this.path.angle - 90);
+            this.ball.velocity.set(globalOptions.ballSpeed * Math.cos(shootingAngle), globalOptions.ballSpeed * Math.sin(shootingAngle));
+            this.shooting = true;
+        }
+        this.aiming = false;
+        this.path.visible = false;
+    },
+
+    update: function(){
+        if(this.shooting){
+            game.physics.arcade.collide(this.ball, this.bottomPanel, function(){
+                this.ball.body.velocity.set(0);
+                this.shooting = false;
+            }, null, this);
+        }
     }
 }
