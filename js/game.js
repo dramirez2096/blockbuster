@@ -84,12 +84,14 @@ playGame.prototype = {
         this.shooting = false;
     },
 
+    // function for aiming ball
     aimBall: function(e){
         if(!this.shooting){
             this.aiming = true;
         }
     },
 
+    // makes trajectory sprite visible and sets shooting angle
     adjustBall: function(e){
         if(this.aiming){
             var distX = e.position.x - e.positionDown.x;
@@ -108,20 +110,22 @@ playGame.prototype = {
         }
     },
 
+    // shoots ball at angle
     shootBall: function (){
         if(this.path.visible){
             var shootingAngle = Phaser.Math.degToRad(this.path.angle - 90);
             this.ball.body.velocity.set(globalOptions.ballSpeed * Math.cos(shootingAngle), globalOptions.ballSpeed * Math.sin(shootingAngle));
-            console.log(this.ball.velocity);
             this.shooting = true;
         }
         this.aiming = false;
         this.path.visible = false;
     },
 
+    // stops ball when it hits the bottom panel
     update: function(){
         if(this.shooting){
             game.physics.arcade.collide(this.ball, this.bottomPanel, function(){
+                console.log('Again! Again! :D');
                 this.ball.body.velocity.set(0);
                 this.shooting = false;
             }, null, this);
