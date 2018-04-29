@@ -23,6 +23,7 @@ playGame.prototype = {
         game.load.image("ball", "img/ball-sprite.png");
         game.load.image("panel", "img/panel.png");
         game.load.image("path", "img/trajectory.png");
+        game.load,image("block", "img/block-sprite.png");
     },
 
     // creates game elements
