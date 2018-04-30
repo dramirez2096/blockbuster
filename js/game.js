@@ -5,7 +5,9 @@ var globalOptions = {
     ballSize: 0.04,
     scorePanelHeight: 0.08,
     bottomPanelHeight: 0.18,
-    ballSpeed: 1000
+    ballSpeed: 1000,
+    blocksPerLine: 7,
+    maxBlocksPerLine: 4
 }
 
 // starts up game when window loads
@@ -23,7 +25,7 @@ playGame.prototype = {
         game.load.image("ball", "img/ball-sprite.png");
         game.load.image("panel", "img/panel.png");
         game.load.image("path", "img/trajectory.png");
-        game.load,image("block", "img/block-sprite.png");
+        game.load.image("block", "img/block-sprite.png");
     },
 
     // creates game elements
@@ -83,6 +85,34 @@ playGame.prototype = {
 
         // player not shooting by default
         this.shooting = false;
+
+        // creates a new line of blocks
+        this.placeLine();
+    },
+
+    placeLine: function(){
+        var blockSize = game.width / globalOptions.blocksPerLine;
+
+        var placedBlocks = [];
+
+        for(var i = 0; i < globalOptions.maxBlocksPerLine; i++){
+            var blockPosition = game.rnd.between(0, globalOptions.blocksPerLine - 1);
+
+            if (placedBlocks.indexOf(blockPosition) == -1 ){
+                placedBlocks.push(blockPosition);
+
+                var block = game.add.sprite(blockPosition * blockSize + blockSize / 2, blockSize / 2 + game.height * globalOptions.scorePanelHeight, "block");
+                block.width = blockSize;
+                block.height = blockSize;
+                block.anchor.set(0.5);
+
+                block.body.immovable = true;
+
+                block.row = 1;
+
+                this.blockGroup.add(block);
+            }
+        }
     },
 
     // function for aiming ball
