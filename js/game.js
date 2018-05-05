@@ -14,6 +14,7 @@ var globalOptions = {
 window.onload = function() {
     game = new Phaser.Game(640, 960, Phaser.CANVAS);
     game.state.add("PlayGame", playGame, true);
+    console.log("on load works");
 }
 
 // code for PlayGame state
@@ -31,19 +32,25 @@ playGame.prototype = {
     // creates game elements
     create: function(){
 
-        // import Phaser Arcade physics engine
-        game.physics.startSystem(Phaser.Physics.ARCADE);
-
         // scales and sets background color
         game.scale.scaleMode = Phaser.ScaleManager.SHOW_ALL;
         game.scale.pageAlignHorizontally = true;
         game.scale.pageAlignVertically = true;
         game.stage.backgroundColor = 0x202020;
 
+        // import Phaser Arcade physics engine
+        game.physics.startSystem(Phaser.Physics.ARCADE);
+
         // creates score panel
-        var scorePanel = game.add.image(0, 0, "panel");
-        scorePanel.width = game.width;
-        scorePanel.height = Math.round(game.height * globalOptions.scorePanelHeight);
+        this.scorePanel = game.add.sprite(0, 0, "panel");
+        this.scorePanel.width = game.width;
+        this.scorePanel.height = Math.round(game.height * globalOptions.scorePanelHeight);
+
+        game.physics.enable(this.scorePanel, Phaser.Physics.ARCADE);
+
+        // this.scorePanel.body.enable = true;
+
+        this.scorePanel.body.immovable = true;
 
         // creates bottom panel
         this.bottomPanel = game.add.sprite(0, game.height, "panel");
@@ -106,11 +113,22 @@ playGame.prototype = {
                 block.height = blockSize;
                 block.anchor.set(0.5);
 
-                block.body.immovable = true;
+                // apply Phaser ARCADE physics to block
+                game.physics.enable(block, Phaser.Physics.ARCADE);
 
+                block.body.enable = true;
+
+                // block.body.immovable = true;
+
+                // makes block appear at row 1
                 block.row = 1;
 
-                this.blockGroup.add(block);
+                this.blockGroup = [];
+                this.blockGroup.add = function(){
+                    this.add = function(block){
+                        this.blockGroup.push(block);
+                    }
+                }
             }
         }
     },
@@ -155,10 +173,31 @@ playGame.prototype = {
     // stops ball when it hits the bottom panel
     update: function(){
         if(this.shooting){
+            game.physics.arcade.collide(this.ball, this.scorePanel);
+            game.physics.arcade.collide(this.ball, this.blockGroup, function(ball, block){
+                block.destroy();
+            }, null, this);
+
             game.physics.arcade.collide(this.ball, this.bottomPanel, function(){
                 console.log('Again! Again! :D');
                 this.ball.body.velocity.set(0);
-                this.shooting = false;
+
+                var scrollTween = game.add.tween(this.blockGroup).to({
+                    y: this.blockGroup.y + game.width / globalOptions.blocksPerLine
+                }, 200, Phaser.Easing.Linear.None, true);
+
+                scrollTween.onComplete.add(function(){
+                    this.shooting = false;
+                    this.blockGroup.y = 0;
+                    this.blockGroup.forEach(function(i){
+                        i.y += game.width / globalOptions.blocksPerLine;
+                        i.row++;
+                        if(i.row == globalOptions.blocksPerLine){
+                            game.state.start("PlayGame");
+                        }
+                    }, this);
+                    this.placeLine();
+                }, this)
             }, null, this);
         }
     }
