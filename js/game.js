@@ -7,7 +7,7 @@ var globalOptions = {
     bottomPanelHeight: 0.18,
     ballSpeed: 1000,
     blocksPerLine: 7,
-    maxBlocksPerLine: 4
+    maxBlocksPerLine: 3
 }
 
 // starts up game when window loads
@@ -93,6 +93,9 @@ playGame.prototype = {
         // player not shooting by default
         this.shooting = false;
 
+        // adds group where blocks will be placed
+        this.blockGroup = game.add.group();
+
         // creates a new line of blocks
         this.placeLine();
     },
@@ -116,19 +119,13 @@ playGame.prototype = {
                 // apply Phaser ARCADE physics to block
                 game.physics.enable(block, Phaser.Physics.ARCADE);
 
-                block.body.enable = true;
-
-                // block.body.immovable = true;
+                block.body.immovable = true;
 
                 // makes block appear at row 1
                 block.row = 1;
 
-                this.blockGroup = [];
-                this.blockGroup.add = function(){
-                    this.add = function(block){
-                        this.blockGroup.push(block);
-                    }
-                }
+                // adds block to block group
+                this.blockGroup.add(block);
             }
         }
     },
@@ -182,6 +179,7 @@ playGame.prototype = {
                 console.log('Again! Again! :D');
                 this.ball.body.velocity.set(0);
 
+                // creates tween to move blocks down after ball stops
                 var scrollTween = game.add.tween(this.blockGroup).to({
                     y: this.blockGroup.y + game.width / globalOptions.blocksPerLine
                 }, 200, Phaser.Easing.Linear.None, true);
