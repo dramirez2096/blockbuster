@@ -7,7 +7,8 @@ var globalOptions = {
     bottomPanelHeight: 0.18,
     ballSpeed: 1000,
     blocksPerLine: 7,
-    maxBlocksPerLine: 3
+    maxBlocksPerLine: 3,
+    extraBallProbability: 60
 }
 
 // starts up game when window loads
@@ -112,10 +113,23 @@ playGame.prototype = {
         this.ballsGroup.add(ball);
 
     },
+    mergeBall: function(i){
+        var scrollTween = game.add.tween(i).to({
+            x: this.ballsGroup.getChildAt(0).x
+        }, 100, Phaser.Easing.Linear.None, true);
+        scrollTween.onComplete.add(function(i){
+            i.destroy();
+        }, this)
+    },
     placeLine: function(){
+        this.level++;
         var blockSize = game.width / globalOptions.blocksPerLine;
-
         var placedBlocks = [];
+        var placeExtraBall = false;
+
+        if(game.rnd.between(0, 99) < globalOptions.extraBallProbability){
+            placeExtraBall = true;
+        }
 
         for(var i = 0; i < globalOptions.maxBlocksPerLine; i++){
             var blockPosition = game.rnd.between(0, globalOptions.blocksPerLine - 1);
@@ -123,21 +137,36 @@ playGame.prototype = {
             if (placedBlocks.indexOf(blockPosition) == -1 ){
                 placedBlocks.push(blockPosition);
 
-                var block = game.add.sprite(blockPosition * blockSize + blockSize / 2, blockSize / 2 + game.height * globalOptions.scorePanelHeight, "block");
-                block.width = blockSize;
-                block.height = blockSize;
-                block.anchor.set(0.5);
-
-                // apply Phaser ARCADE physics to block
-                game.physics.enable(block, Phaser.Physics.ARCADE);
-
-                block.body.immovable = true;
-
-                // makes block appear at row 1
-                block.row = 1;
-
-                // adds block to block group
-                this.blockGroup.add(block);
+                if(!placeExtraBall){
+                    var block = game.add.sprite(blockPosition * blockSize + blockSize / 2, blockSize / 2 + game.height * globalOptions.scorePanelHeight, "block");
+                    block.width = blockSize;
+                    block.height = blockSize;
+                    block.anchor.set(0.5);
+                    block.value = this.level
+                    game.physics.enable(block, Phaser.Physics.ARCADE);
+                    block.body.immovable = true;
+                    block.row = 1;
+                    this.blockGroup.add(block);
+                    var text = game.add.text(0,0, block.value, {
+                        font: "bold 32px Arial",
+                        align: "center"
+                    });
+                    text.anchor.set(0.5);
+                    block.addChild(text);
+                }
+                else {
+                    placeExtraBall = false;
+                    var ballSize = game.width * globalOptions.ballSize;
+                    var ball = game.add.sprite(blockPosition * blockSize + blockSize / 2, blockSize / 2 + game.height * globalOptions.scorePanelHeight, "ball");
+                    ball.width = ballSize
+                    ball.height = ballSize;
+                    ball.anchor.set(0.5);
+                    ball.tint = 0xff8800;
+                    game.physics.enable(ball, Phaser.Physics.ARCADE);
+                    ball.body.immovable = true;
+                    this.extraBallGroup.add(ball);
+                    ball.row = 1;
+                }
             }
         }
     },
