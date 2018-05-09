@@ -41,14 +41,21 @@ playGame.prototype = {
         // import Phaser Arcade physics engine
         game.physics.startSystem(Phaser.Physics.ARCADE);
 
+        this.blockGroup = game.add.group();
+        this.extraBallGroup = game.add.group();
+        this.ballsToBeAddedGroup = game.add.group();
+        this.ballsGroup = game.add.group();
+        this.fallingGroup = game.add.group();
+        this.fallingGroup.add(this.blockGroup);
+        this.fallingGroup.add(this.extraBallGroup);
+
         // creates score panel
         this.scorePanel = game.add.sprite(0, 0, "panel");
         this.scorePanel.width = game.width;
         this.scorePanel.height = Math.round(game.height * globalOptions.scorePanelHeight);
 
+        // enables game physics on score panel
         game.physics.enable(this.scorePanel, Phaser.Physics.ARCADE);
-
-        // this.scorePanel.body.enable = true;
 
         this.scorePanel.body.immovable = true;
 
@@ -65,20 +72,10 @@ playGame.prototype = {
 
         // creates ball 
         var ballSize = game.width * globalOptions.ballSize;
-        this.ball = game.add.sprite(game.width / 2, game.height - this.bottomPanel.height - ballSize / 2, "ball");
-        this.ball.width = ballSize;
-        this.ball.height = ballSize;
-        this.ball.anchor.set(0.5);
-
-        // adds Phaser arcade physics engine to ball
-        game.physics.enable(this.ball, Phaser.Physics.ARCADE);
-
-        // makes ball collide on bounds
-        this.ball.body.collideWorldBounds = true;
-        this.ball.body.bounce.set(1);
+        this.addBall(game.width / 2, game.height - this.bottomPanel.height - ballSize / 2);
 
         // creates ball shooting path 
-        this.path = game.add.sprite(this.ball.x, this.ball.y, "path");
+        this.path = game.add.sprite(this.ballsGroup.getChildAt(0).x, this.ballsGroup.getChildAt(0).y, "path");
         this.path.anchor.set(0.5, 1);
         this.path.visible = false;
 
@@ -93,13 +90,28 @@ playGame.prototype = {
         // player not shooting by default
         this.shooting = false;
 
-        // adds group where blocks will be placed
-        this.blockGroup = game.add.group();
+        this.level = 0;
 
         // creates a new line of blocks
         this.placeLine();
-    },
 
+        this.extraBalls = 0;
+    },
+    addBall: function(x,y){
+        var ballSize = game.width * globalOptions.ballSize;
+        var ball = game.add.sprite(x, y, "ball");
+        ball.width = ballSize;
+        ball.height = ballSize;
+        ball.anchor.set(0.5);
+
+        game.physics.enable(ball, Phaser.Physics.ARCADE);
+
+        // makes ball collide on bounds
+        ball.body.collideWorldBounds = true;
+        ball.body.bounce.set(1);
+        this.ballsGroup.add(ball);
+
+    },
     placeLine: function(){
         var blockSize = game.width / globalOptions.blocksPerLine;
 
@@ -145,7 +157,7 @@ playGame.prototype = {
             console.log(distX,distY);
 
             if (distY > 10){
-                this.path.position.set(this.ball.x, this.ball.y);
+                this.path.position.set(this.ballsGroup.getChildAt(0).x, this.ballsGroup.getChildAt(0).y);
                 this.path.visible = true;
                 this.direction = Phaser.Math.angleBetween(e.position.x, e.position.y, e.positionDown.x, e.positionDown.y);
                 this.path.angle = Phaser.Math.radToDeg(this.direction) + 90;
@@ -160,7 +172,7 @@ playGame.prototype = {
     shootBall: function (){
         if(this.path.visible){
             var shootingAngle = Phaser.Math.degToRad(this.path.angle - 90);
-            this.ball.body.velocity.set(globalOptions.ballSpeed * Math.cos(shootingAngle), globalOptions.ballSpeed * Math.sin(shootingAngle));
+            this.ballsGroup.getChildAt(0).body.velocity.set(globalOptions.ballSpeed * Math.cos(shootingAngle), globalOptions.ballSpeed * Math.sin(shootingAngle));
             this.shooting = true;
         }
         this.aiming = false;
@@ -170,12 +182,12 @@ playGame.prototype = {
     // stops ball when it hits the bottom panel
     update: function(){
         if(this.shooting){
-            game.physics.arcade.collide(this.ball, this.scorePanel);
-            game.physics.arcade.collide(this.ball, this.blockGroup, function(ball, block){
+            game.physics.arcade.collide(this.ballsGroup, this.scorePanel);
+            game.physics.arcade.collide(this.ballsGroup, this.blockGroup, function(ball, block){
                 block.destroy();
             }, null, this);
 
-            game.physics.arcade.collide(this.ball, this.bottomPanel, function(){
+            game.physics.arcade.collide(this.ballsGroup, this.bottomPanel, function(){
                 console.log('Again! Again! :D');
                 this.ball.body.velocity.set(0);
 
