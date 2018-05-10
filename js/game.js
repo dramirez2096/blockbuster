@@ -200,7 +200,22 @@ playGame.prototype = {
     // shoots ball at angle
     shootBall: function (){
         if(this.path.visible){
+            this.landedBalls = 0;
             var shootingAngle = Phaser.Math.degToRad(this.path.angle - 90);
+            var pointOfFire = new Phaser.Point(this.ballsGroup.getChildAt(0).x, this.ballsGroup.getChildAt(0).y);
+            var ballsFired = 0;
+            var fireLoop = game.time.events.loop(Phaser.Timer.SECOND / 10, function(){
+                ballsFired++;
+                if(ballsFired > this.extraBalls){
+                    game.time.events.remove(fireLoop);
+                }
+                else{
+                    this.addBall(pointOfFire.x, pointOfFire.y);
+                    console.log(ballsFired,this.ballsGroup.children.length)
+                    this.ballsGroup.getChildAt(this.ballsGroup.children.length - 1).body.velocity.set(globalOptions.ballSpeed * Math.cos(shootingAngle), globalOptions.ballSpeed * Math.sin(shootingAngle));
+                }
+            }, this)
+
             this.ballsGroup.getChildAt(0).body.velocity.set(globalOptions.ballSpeed * Math.cos(shootingAngle), globalOptions.ballSpeed * Math.sin(shootingAngle));
             this.shooting = true;
         }
@@ -213,30 +228,63 @@ playGame.prototype = {
         if(this.shooting){
             game.physics.arcade.collide(this.ballsGroup, this.scorePanel);
             game.physics.arcade.collide(this.ballsGroup, this.blockGroup, function(ball, block){
+                block.value --;
+                if(block.value == 0){
                 block.destroy();
+                }
+                else{
+                    block.getChildAt(0).text = block.value;
+                }
             }, null, this);
 
-            game.physics.arcade.collide(this.ballsGroup, this.bottomPanel, function(){
-                console.log('Again! Again! :D');
-                this.ball.body.velocity.set(0);
-
-                // creates tween to move blocks down after ball stops
-                var scrollTween = game.add.tween(this.blockGroup).to({
-                    y: this.blockGroup.y + game.width / globalOptions.blocksPerLine
+            game.physics.arcade.overlap(this.ballsGroup, this.extraBallGroup, function(ball, extraBall){
+                this.ballsToBeAddedGroup.add(extraBall)
+                var scrollTween = game.add.tween(extraBall).to({
+                    y: game.height - this.bottomPanel.height - (game.width * globalOptions.ballSize) / 2
                 }, 200, Phaser.Easing.Linear.None, true);
-
-                scrollTween.onComplete.add(function(){
-                    this.shooting = false;
-                    this.blockGroup.y = 0;
-                    this.blockGroup.forEach(function(i){
-                        i.y += game.width / globalOptions.blocksPerLine;
-                        i.row++;
-                        if(i.row == globalOptions.blocksPerLine){
-                            game.state.start("PlayGame");
-                        }
-                    }, this);
-                    this.placeLine();
+                scrollTween.onComplete.add(function(e){
+                    e.tint = 0xffffff;
                 }, this)
+            }, null, this);
+
+            game.physics.arcade.collide(this.ballsGroup, this.bottomPanel, function(panel,ball){
+                console.log('Again! Again! :D');
+                ball.body.velocity.set(0);
+                if(this.landedBalls == 0){
+                    this.ballsGroup.swapChildren(ball, this.ballsGroup.getChildAt(0));
+                }
+                else{
+                    this.mergeBall(ball);
+                }
+                this.landedBalls++;
+                if(this.landedBalls > this.extraBalls){
+                    this.ballsToBeAddedGroup.forEach(function(i){
+                        this.extraBalls ++;
+                        this.mergeBall(i);
+                    }, this);
+                    var scrollTween = game.add.tween(this.fallingGroup).to({
+                        y: this.fallingGroup.y + game.width / globalOptions.blocksPerLine
+                    }, 200, Phaser.Easing.Linear.None, true);
+                    scrollTween.onComplete.add(function(){
+                        this.shooting = false;
+                        this.blockGroup.y = 0;
+                        this.blockGroup.forEach(function(i){
+                            i.y += game.width / globalOptions.blocksPerLine;
+                            i.row++;
+                            if(i.row == globalOptions.blocksPerLine){
+                                game.state.start("PlayGame");
+                            }
+                        }, this);
+                        this.extraBallGroup.forEach(function(i){
+                            i.y += game.width / globalOptions.blocksPerLine;
+                            i.row++;
+                            if(i.row == globalOptions.blocksPerLine){
+                                i.destroy()
+                            }
+                    }, this);
+                        this.placeLine();
+                    }, this)
+                }
             }, null, this);
         }
     }
