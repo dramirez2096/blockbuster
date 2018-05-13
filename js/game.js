@@ -183,7 +183,7 @@ playGame.prototype = {
         if(this.aiming){
             var distX = e.position.x - e.positionDown.x;
             var distY = e.position.y - e.positionDown.y;
-            console.log(distX,distY);
+            // console.log(distX,distY);
 
             if (distY > 10){
                 this.path.position.set(this.ballsGroup.getChildAt(0).x, this.ballsGroup.getChildAt(0).y);
@@ -211,7 +211,7 @@ playGame.prototype = {
                 }
                 else{
                     this.addBall(pointOfFire.x, pointOfFire.y);
-                    console.log(ballsFired,this.ballsGroup.children.length)
+                    // console.log(ballsFired,this.ballsGroup.children.length)
                     this.ballsGroup.getChildAt(this.ballsGroup.children.length - 1).body.velocity.set(globalOptions.ballSpeed * Math.cos(shootingAngle), globalOptions.ballSpeed * Math.sin(shootingAngle));
                 }
             }, this)
@@ -267,12 +267,13 @@ playGame.prototype = {
                     }, 200, Phaser.Easing.Linear.None, true);
                     scrollTween.onComplete.add(function(){
                         this.shooting = false;
-                        this.blockGroup.y = 0;
+                        this.fallingGroup.y = 0;
                         this.blockGroup.forEach(function(i){
                             i.y += game.width / globalOptions.blocksPerLine;
                             i.row++;
                             if(i.row == globalOptions.blocksPerLine){
                                 game.state.start("PlayGame");
+                                console.log('You Lost');
                             }
                         }, this);
                         this.extraBallGroup.forEach(function(i){
