@@ -25,7 +25,7 @@ playGame.prototype = {
     // preloads sprites
     preload: function(){
         game.load.image("ball", "img/ball-sprite.png");
-        game.load.image("panel", "img/panel.png");
+        game.load.image("panel", "img/panel-sprite.png");
         game.load.image("path", "img/trajectory.png");
         game.load.image("block", "img/block-sprite.png");
     },
@@ -37,7 +37,7 @@ playGame.prototype = {
         game.scale.scaleMode = Phaser.ScaleManager.SHOW_ALL;
         game.scale.pageAlignHorizontally = true;
         game.scale.pageAlignVertically = true;
-        game.stage.backgroundColor = 0x202020;
+        game.stage.backgroundColor = 0x2C3E50;
 
         // import Phaser Arcade physics engine
         game.physics.startSystem(Phaser.Physics.ARCADE);
@@ -54,6 +54,8 @@ playGame.prototype = {
         this.scorePanel = game.add.sprite(0, 0, "panel");
         this.scorePanel.width = game.width;
         this.scorePanel.height = Math.round(game.height * globalOptions.scorePanelHeight);
+        this.scorePanel.tint = 0x273747;
+        
 
         // enables game physics on score panel
         game.physics.enable(this.scorePanel, Phaser.Physics.ARCADE);
@@ -65,6 +67,7 @@ playGame.prototype = {
         this.bottomPanel.width = game.width;
         this.bottomPanel.height = Math.round(game.height * globalOptions.bottomPanelHeight);
         this.bottomPanel.anchor.set(0, 1);
+        this.bottomPanel.tint = 0x273747;
 
         // adds Phaser arcade physics engine on bottom panel
         game.physics.enable(this.bottomPanel, Phaser.Physics.ARCADE);
@@ -79,6 +82,7 @@ playGame.prototype = {
         this.path = game.add.sprite(this.ballsGroup.getChildAt(0).x, this.ballsGroup.getChildAt(0).y, "path");
         this.path.anchor.set(0.5, 1);
         this.path.visible = false;
+        this.path.tint = 0xECF0F1;
 
         // code for player inputs
         game.input.onDown.add(this.aimBall, this);
@@ -104,6 +108,7 @@ playGame.prototype = {
         ball.width = ballSize;
         ball.height = ballSize;
         ball.anchor.set(0.5);
+        ball.tint = 0xE74C3C;
 
         game.physics.enable(ball, Phaser.Physics.ARCADE);
 
@@ -141,6 +146,7 @@ playGame.prototype = {
                     var block = game.add.sprite(blockPosition * blockSize + blockSize / 2, blockSize / 2 + game.height * globalOptions.scorePanelHeight, "block");
                     block.width = blockSize;
                     block.height = blockSize;
+                    block.tint = 0xECF0F1;
                     block.anchor.set(0.5);
                     block.value = this.level
                     game.physics.enable(block, Phaser.Physics.ARCADE);
@@ -161,7 +167,7 @@ playGame.prototype = {
                     ball.width = ballSize
                     ball.height = ballSize;
                     ball.anchor.set(0.5);
-                    ball.tint = 0xff8800;
+                    ball.tint = 0x3498DB;
                     game.physics.enable(ball, Phaser.Physics.ARCADE);
                     ball.body.immovable = true;
                     this.extraBallGroup.add(ball);
@@ -243,7 +249,7 @@ playGame.prototype = {
                     y: game.height - this.bottomPanel.height - (game.width * globalOptions.ballSize) / 2
                 }, 200, Phaser.Easing.Linear.None, true);
                 scrollTween.onComplete.add(function(e){
-                    e.tint = 0xffffff;
+                    e.tint = 0xE74C3C;
                 }, this)
             }, null, this);
 
