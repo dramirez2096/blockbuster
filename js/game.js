@@ -12,7 +12,7 @@ var globalOptions = {
 }
 
 // starts up game when window loads
-window.onload = function() {
+function startGame() {
     game = new Phaser.Game(640, 960, Phaser.CANVAS);
     game.state.add("PlayGame", playGame, true);
     console.log("on load works");
