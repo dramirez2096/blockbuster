@@ -1,6 +1,7 @@
 body{
     padding: 0;
     margin: 0;
+    background-color: #E8ECED;
 }
 canvas{
     width: 50vw;
