@@ -6,3 +6,25 @@ body{
 canvas{
     width: 50vw;
 }
+.container{
+    display: flex;
+    width: 100%;
+    height: 100%;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    padding-top: 100px;
+}
+.title{
+    margin-bottom: 50px;
+}
+.play-button{
+    height: 50px;
+    width: 100px;
+    border-radius: 15px;
+    cursor: pointer;
+    background-color: #3498DB;
+    color: #fff;
+    font-size: 20px;
+    border: none;
+}
