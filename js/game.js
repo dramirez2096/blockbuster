@@ -13,8 +13,10 @@ var globalOptions = {
 
 // starts up game when window loads
 function startGame() {
+    var button = document.querySelector('.play-button');
     game = new Phaser.Game(640, 960, Phaser.CANVAS);
     game.state.add("PlayGame", playGame, true);
+    button.style.display = 'none';
     console.log("on load works");
 }
 
